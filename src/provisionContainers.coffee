@@ -99,6 +99,20 @@ class DockerClient
         console.log colors.green "removing dangling images"
         yield @sshClient.exec "docker rmi `docker images -qf dangling=true`"
 
+    login: Promise.coroutine (username, password) ->
+        console.log colors.green "doing login for private registry"
+
+        token = new Buffer("#{username}:#{password}").toString 'base64'
+
+        auth =
+            auths:
+                'docker.actano.de':
+                    auth: token
+                    email: ''
+
+        yield @sshClient.exec 'mkdir -p /home/vagrant/.docker'
+        yield @sshClient.writeToFile JSON.stringify(auth), '/home/vagrant/.docker/config.json'
+
     _writeEnvFile: Promise.coroutine (env, remotePath) ->
         contents = ''
 
@@ -109,12 +123,8 @@ class DockerClient
 
 do Promise.coroutine ->
     privateKey = yield fs.readFileAsync path.join os.homedir(), '.ssh/id_rsa'
-
-    auth =
-        auths:
-            'my.docker.registry':
-                auth: ''
-                email: ''
+    username = ''
+    password = ''
 
     for name, config of dcConfig
         console.log colors.green "starting #{name}"
@@ -126,10 +136,9 @@ do Promise.coroutine ->
 
         yield client.connect()
 
-        yield client.exec 'mkdir -p /home/vagrant/.docker'
-        yield client.writeToFile JSON.stringify(auth), '/home/vagrant/.docker/config.json'
-
         dockerClient = new DockerClient client
+
+        yield dockerClient.login username, password
         yield dockerClient.pull config.tag
         yield dockerClient.stop config.containerName
         yield dockerClient.rm config.containerName
