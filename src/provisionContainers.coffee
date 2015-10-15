@@ -147,13 +147,14 @@ do Promise.coroutine ->
 
         yield client.connect()
 
-        dockerClient = new DockerClient client
+        try
+            dockerClient = new DockerClient client
 
-        yield dockerClient.login username, password
-        yield dockerClient.pull config.tag
-        yield dockerClient.stop config.containerName
-        yield dockerClient.rm config.containerName
-        yield dockerClient.run config
-        yield dockerClient.removeDanglingImages()
-
-        yield client.close()
+            yield dockerClient.login username, password
+            yield dockerClient.pull config.tag
+            yield dockerClient.stop config.containerName
+            yield dockerClient.rm config.containerName
+            yield dockerClient.run config
+            yield dockerClient.removeDanglingImages()
+        finally
+            yield client.close()
