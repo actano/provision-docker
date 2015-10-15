@@ -1,0 +1,17 @@
+module.exports =
+    app1:
+        ip: '192.168.0.1'
+        tag: 'myapp'
+        containerName: 'app1'
+        ports: [
+            '1234:8080'
+        ]
+        environment:
+            foo: bar
+    db:
+        ip: '192.168.0.2'
+        tag: 'couchbase:community-3.0.1'
+        containerName: 'couchbase'
+        ports: [
+            '8091:8091'
+        ]
