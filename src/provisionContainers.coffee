@@ -90,11 +90,15 @@ class DockerClient
 
     stop: Promise.coroutine (containerName) ->
         console.log colors.green "stopping container #{containerName}"
-        yield @sshClient.exec "docker stop #{containerName}"
+        try
+            yield @sshClient.exec "docker stop #{containerName}"
+        catch err # allow fail, container may not exist
 
     rm: Promise.coroutine (containerName) ->
         console.log colors.green "removing container #{containerName}"
-        yield @sshClient.exec "docker rm -v #{containerName}"
+        try
+            yield @sshClient.exec "docker rm -v #{containerName}"
+        catch err # allow fail, container may not exist
 
     pull: Promise.coroutine (tag) ->
         console.log colors.green "pulling image #{tag}"
@@ -102,7 +106,9 @@ class DockerClient
 
     removeDanglingImages: Promise.coroutine ->
         console.log colors.green "removing dangling images"
-        yield @sshClient.exec "docker rmi `docker images -qf dangling=true`"
+        try
+            yield @sshClient.exec "docker rmi `docker images -qf dangling=true`"
+        catch err # allow fail, when no danling images present
 
     login: Promise.coroutine (username, password) ->
         console.log colors.green "doing login for private registry"
