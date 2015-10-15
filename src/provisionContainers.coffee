@@ -12,7 +12,6 @@ DockerClient = require './docker-client'
 Promise.promisifyAll fs
 
 do Promise.coroutine ->
-    privateKey = yield fs.readFileAsync path.join os.homedir(), '.ssh/id_rsa'
     username = ''
     password = ''
 
@@ -22,7 +21,7 @@ do Promise.coroutine ->
         client = new SSHClient
             host: config.ip
             username: 'vagrant'
-            privateKey: privateKey
+            agent: process.env.SSH_AUTH_SOCK
 
         yield client.connect()
 
