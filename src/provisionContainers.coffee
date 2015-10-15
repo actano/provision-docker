@@ -4,6 +4,7 @@ Promise = require 'bluebird'
 fs = require 'fs'
 path = require 'path'
 os = require 'os'
+colors = require 'colors/safe'
 Promise.promisifyAll fs
 Promise.promisifyAll Client.prototype
 
@@ -74,24 +75,24 @@ class DockerClient
 
         command += " #{tag}"
 
-        console.log "starting container via '#{command}'"
+        console.log colors.green "starting container via '#{command}'"
 
         yield @sshClient.exec command
 
     stop: Promise.coroutine (containerName) ->
-        console.log "stopping container #{containerName}"
+        console.log colors.green "stopping container #{containerName}"
         yield @sshClient.exec "docker stop #{containerName}"
 
     rm: Promise.coroutine (containerName) ->
-        console.log "removing container #{containerName}"
+        console.log colors.green "removing container #{containerName}"
         yield @sshClient.exec "docker rm -v #{containerName}"
 
     pull: Promise.coroutine (tag) ->
-        console.log "pulling image #{tag}"
+        console.log colors.green "pulling image #{tag}"
         yield @sshClient.exec "docker pull #{tag}"
 
     removeDanglingImages: Promise.coroutine ->
-        console.log "removing dangling images"
+        console.log colors.green "removing dangling images"
         yield @sshClient.exec "docker rmi `docker images -qf dangling=true`"
 
 do Promise.coroutine ->
@@ -104,7 +105,7 @@ do Promise.coroutine ->
                 email: ''
 
     for name, config of dcConfig
-        console.log "starting #{name}"
+        console.log colors.green "starting #{name}"
 
         client = new SSHClient
             host: config.ip
