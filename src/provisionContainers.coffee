@@ -1,9 +1,11 @@
-dcConfig = require './config'
-Promise = require 'bluebird'
 fs = require 'fs'
 path = require 'path'
 os = require 'os'
+
+Promise = require 'bluebird'
 colors = require 'colors/safe'
+
+dcConfig = require './config'
 SSHClient = require './ssh-client'
 DockerClient = require './docker-client'
 
