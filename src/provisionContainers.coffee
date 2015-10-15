@@ -65,13 +65,17 @@ class DockerClient
         ports ?= []
         environment ?= {}
 
+        if Object.keys(environment).length > 0
+            envFile = path.join "/home/vagrant/#{containerName}.env"
+            yield @_writeEnvFile environment, envFile
+
         command = "docker run -d --name #{containerName}"
 
         for port in ports
             command += " -p #{port}"
 
-        for key, value of environment
-            command += " -e #{key}=#{value}"
+        if envFile?
+            command += " --env-file #{envFile}"
 
         command += " #{tag}"
 
@@ -94,6 +98,14 @@ class DockerClient
     removeDanglingImages: Promise.coroutine ->
         console.log colors.green "removing dangling images"
         yield @sshClient.exec "docker rmi `docker images -qf dangling=true`"
+
+    _writeEnvFile: Promise.coroutine (env, remotePath) ->
+        contents = ''
+
+        for key, value of env
+            contents += "#{key}=#{value}\n"
+
+        yield @sshClient.writeToFile contents, remotePath
 
 do Promise.coroutine ->
     privateKey = yield fs.readFileAsync path.join os.homedir(), '.ssh/id_rsa'
