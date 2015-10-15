@@ -18,15 +18,15 @@ do Promise.coroutine ->
     for name, config of dcConfig
         console.log colors.green "starting #{name}"
 
-        client = new SSHClient
+        sshClient = new SSHClient
             host: config.ip
             username: 'vagrant'
             agent: process.env.SSH_AUTH_SOCK
 
-        yield client.connect()
+        yield sshClient.connect()
 
         try
-            dockerClient = new DockerClient client
+            dockerClient = new DockerClient sshClient
 
             yield dockerClient.login username, password
             yield dockerClient.pull config.tag
@@ -35,4 +35,4 @@ do Promise.coroutine ->
             yield dockerClient.run config
             yield dockerClient.removeDanglingImages()
         finally
-            yield client.close()
+            yield sshClient.close()
