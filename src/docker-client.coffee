@@ -59,6 +59,11 @@ class DockerClient
     login: Promise.coroutine (username, password) ->
         console.log colors.green "doing login for private registry"
 
+        exists = yield @sshClient.fileExists '/home/vagrant/.docker/config.json'
+        if exists
+            console.log colors.green 'already logged in'
+            return
+
         token = new Buffer("#{username}:#{password}").toString 'base64'
 
         auth =
