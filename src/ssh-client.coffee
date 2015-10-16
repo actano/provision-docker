@@ -1,5 +1,5 @@
 Promise = require 'bluebird'
-{Client} = require 'ssh2'
+{Client, SFTP_STATUS_CODE} = require 'ssh2'
 
 Promise.promisifyAll Client.prototype
 
@@ -51,5 +51,18 @@ class SSHClient
                 writeStream.write content, 'utf-8', (err) ->
                     return reject err if err?
                     writeStream.end()
+
+    fileExists: (remotePath) ->
+        new Promise (resolve, reject) =>
+            @connection.sftp (err, sftp) =>
+                return reject err if err?
+
+                sftp.stat remotePath, (err, stats) ->
+                    if err?
+                        if err.code is SFTP_STATUS_CODE.NO_SUCH_FILE
+                            return resolve false
+                        return reject err
+
+                    resolve true
 
 module.exports = SSHClient
