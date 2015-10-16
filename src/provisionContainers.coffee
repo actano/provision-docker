@@ -1,10 +1,5 @@
-fs = require 'fs'
-path = require 'path'
-os = require 'os'
-
 Promise = require 'bluebird'
 colors = require 'colors/safe'
-portscanner = require 'portscanner'
 _ = require 'lodash'
 
 dcConfig = require './config'
@@ -12,7 +7,6 @@ dcConfig = require './config'
 DockerClient = require './docker-client'
 healthCheck = require './health-check'
 
-Promise.promisifyAll fs
 Promise.longStackTraces()
 
 runContainer = Promise.coroutine (dockerClient, tag, containerName, runConfig) ->
