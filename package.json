@@ -12,5 +12,8 @@
     "colors": "^1.1.2",
     "portscanner": "^1.0.0",
     "ssh2": "^0.4.11"
+  },
+  "scripts": {
+    "prepublish": "coffee -c -o lib src/"
   }
 }
