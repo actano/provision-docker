@@ -1,7 +1,7 @@
 {
   "name": "provision-docker",
   "version": "0.0.1",
-  "description": "",
+  "description": "a tool for provisioning of docker containers via SSH",
   "main": "index.js",
   "author": "thomas.rucker@actano.de",
   "devDependencies": {
