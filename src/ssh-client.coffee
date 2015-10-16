@@ -65,4 +65,31 @@ class SSHClient
 
                     resolve true
 
-module.exports = SSHClient
+class ProxiedSSHClient extends SSHClient
+    constructor: (@proxyConfig, config) ->
+        @_host = config.host
+        @_port = config.port ? 22
+
+        config.host = undefined
+        config.port = undefined
+        super config
+
+    connect: Promise.coroutine ->
+        throw new Error 'no host to proxy to given' unless @_host?
+        throw new Error 'no port to proxy to given' unless @_port?
+
+        @_proxyClient = new SSHClient @proxyConfig
+        yield @_proxyClient.connect()
+
+        proxyStream = yield @_proxyClient.connection.execAsync "nc #{@_host} #{@_port}"
+        @config.sock = proxyStream
+        yield SSHClient::connect.call this
+
+    close: Promise.coroutine ->
+        yield SSHClient::close.call this
+        yield @_proxyClient.close()
+
+module.exports = {
+    SSHClient
+    ProxiedSSHClient
+}

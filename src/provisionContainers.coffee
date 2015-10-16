@@ -7,7 +7,7 @@ colors = require 'colors/safe'
 portscanner = require 'portscanner'
 
 dcConfig = require './config'
-SSHClient = require './ssh-client'
+{SSHClient} = require './ssh-client'
 DockerClient = require './docker-client'
 healthCheck = require './health-check'
 
