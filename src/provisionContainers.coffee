@@ -39,6 +39,12 @@ ensureContainer = Promise.coroutine (dockerClient, host, healthCheckPort, tag, c
 
     yield runContainer dockerClient, tag, containerName, runConfig
 
+loginToRegistry = Promise.coroutine (dockerClient, username, password) ->
+    yield dockerClient.login username, password
+
+cleanup = Promise.coroutine (dockerClient) ->
+    yield dockerClient.removeDanglingImages()
+
 do Promise.coroutine ->
     username = ''
     password = ''
@@ -54,8 +60,8 @@ do Promise.coroutine ->
         try
             dockerClient = new DockerClient sshClient
 
-            yield dockerClient.login username, password
+            yield loginToRegistry dockerClient, username, password
             yield replaceContainer dockerClient, config.tag, config.containerName, config.runConfig
-            yield dockerClient.removeDanglingImages()
+            yield cleanup dockerClient
         finally
             yield sshClient.close()
