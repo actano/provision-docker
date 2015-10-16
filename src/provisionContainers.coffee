@@ -12,6 +12,7 @@ DockerClient = require './docker-client'
 healthCheck = require './health-check'
 
 Promise.promisifyAll fs
+Promise.longStackTraces()
 
 do Promise.coroutine ->
     username = ''
