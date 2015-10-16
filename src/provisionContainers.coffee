@@ -15,30 +15,35 @@ healthCheck = require './health-check'
 Promise.promisifyAll fs
 Promise.longStackTraces()
 
-replaceContainer = Promise.coroutine (dockerClient, tag, containerName, runConfig) ->
+runContainer = Promise.coroutine (dockerClient, tag, containerName, runConfig) ->
     _runConfig = _.extend {}, runConfig, {containerName, tag}
+    yield dockerClient.run _runConfig
 
+replaceContainer = Promise.coroutine (dockerClient, tag, containerName, runConfig) ->
     yield dockerClient.pull tag
     yield dockerClient.stop containerName
     yield dockerClient.rm containerName
-    yield dockerClient.run _runConfig
+    yield runContainer dockerClient, tag, containerName, runConfig
+
+ensureContainer = Promise.coroutine (dockerClient, host, healthCheckPort, tag, containerName, runConfig) ->
+    console.log colors.green "checking health of #{containerName}"
+
+    isHealthy = yield healthCheck host, healthCheckPort
+
+    if isHealthy
+        console.log colors.green "#{containerName} seems to be healthy"
+        return
+
+    console.log colors.yellow "#{containerName} seems to be down"
+    console.log colors.green "starting #{containerName}"
+
+    yield runContainer dockerClient, tag, containerName, runConfig
 
 do Promise.coroutine ->
     username = ''
     password = ''
 
     for name, config of dcConfig
-        console.log colors.green "checking health of #{name}"
-
-        isHealthy = yield healthCheck config.ip, config.healthCheckPort
-
-        if isHealthy
-            console.log colors.green "#{name} seems to be healthy"
-            continue
-
-        console.log colors.yellow "#{name} seems to be down"
-        console.log colors.green "starting #{name}"
-
         sshClient = new SSHClient
             host: config.ip
             username: 'vagrant'
