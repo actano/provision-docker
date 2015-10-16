@@ -5,6 +5,7 @@ os = require 'os'
 Promise = require 'bluebird'
 colors = require 'colors/safe'
 portscanner = require 'portscanner'
+_ = require 'lodash'
 
 dcConfig = require './config'
 {SSHClient} = require './ssh-client'
@@ -13,6 +14,14 @@ healthCheck = require './health-check'
 
 Promise.promisifyAll fs
 Promise.longStackTraces()
+
+replaceContainer = Promise.coroutine (dockerClient, tag, containerName, runConfig) ->
+    _runConfig = _.extend {}, runConfig, {containerName, tag}
+
+    yield dockerClient.pull tag
+    yield dockerClient.stop containerName
+    yield dockerClient.rm containerName
+    yield dockerClient.run _runConfig
 
 do Promise.coroutine ->
     username = ''
@@ -41,10 +50,7 @@ do Promise.coroutine ->
             dockerClient = new DockerClient sshClient
 
             yield dockerClient.login username, password
-            yield dockerClient.pull config.tag
-            yield dockerClient.stop config.containerName
-            yield dockerClient.rm config.containerName
-            yield dockerClient.run config
+            yield replaceContainer dockerClient, config.tag, config.containerName, config.runConfig
             yield dockerClient.removeDanglingImages()
         finally
             yield sshClient.close()
