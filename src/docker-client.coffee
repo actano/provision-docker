@@ -56,7 +56,7 @@ class DockerClient
             yield @sshClient.exec "docker rmi `docker images -qf dangling=true`"
         catch err # allow fail, when no danling images present
 
-    login: Promise.coroutine (username, password) ->
+    login: Promise.coroutine (registryHost, username, password) ->
         console.log colors.green "doing login for private registry"
 
         exists = yield @sshClient.fileExists '/home/vagrant/.docker/config.json'
@@ -67,10 +67,11 @@ class DockerClient
         token = new Buffer("#{username}:#{password}").toString 'base64'
 
         auth =
-            auths:
-                'docker.actano.de':
-                    auth: token
-                    email: ''
+            auths: {}
+
+        auth.auths[registryHost] =
+            auth: token
+            email: ''
 
         yield @sshClient.exec 'mkdir -p /home/vagrant/.docker'
         yield @sshClient.writeToFile JSON.stringify(auth), '/home/vagrant/.docker/config.json'

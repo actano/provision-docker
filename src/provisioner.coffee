@@ -64,8 +64,8 @@ module.exports = (host) ->
         ###
             Login to private docker registry via `username` and `password`.
         ###
-        loginToRegistry: Promise.coroutine (username, password) ->
-            yield @dockerClient.login username, password
+        loginToRegistry: Promise.coroutine (registryHost, username, password) ->
+            yield @dockerClient.login registryHost, username, password
 
         ###
             Docker related cleanup.
