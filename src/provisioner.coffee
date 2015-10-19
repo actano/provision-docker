@@ -2,17 +2,27 @@ Promise = require 'bluebird'
 colors = require 'colors/safe'
 _ = require 'lodash'
 
-{SSHClient} = require './ssh-client'
+{SSHClient, ProxiedSSHClient} = require './ssh-client'
 DockerClient = require './docker-client'
 healthCheck = require './health-check'
 
-module.exports = (host) ->
+module.exports = (host, proxy) ->
     return {
         connect: Promise.coroutine ->
-            @sshClient = new SSHClient
-                host: host
-                username: 'vagrant'
-                agent: process.env.SSH_AUTH_SOCK
+            if proxy?
+                @sshClient = new ProxiedSSHClient
+                        host: proxy
+                        username: 'vagrant'
+                        agent: process.env.SSH_AUTH_SOCK
+                    ,
+                        host: host
+                        username: 'vagrant'
+                        agent: process.env.SSH_AUTH_SOCK
+            else
+                @sshClient = new SSHClient
+                    host: host
+                    username: 'vagrant'
+                    agent: process.env.SSH_AUTH_SOCK
 
             yield @sshClient.connect()
             @dockerClient = new DockerClient @sshClient
