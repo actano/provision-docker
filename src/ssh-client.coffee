@@ -37,6 +37,10 @@ class SSHClient
                             error = new Error "command '#{command}' failed with exit code #{code}"
                             error.code = code
                             reject error
+                    .on 'error', (err) ->
+                        reject err
+                    .on 'end', ->
+                        resolve()
             catch err
                 reject err
 
