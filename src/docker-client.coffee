@@ -6,7 +6,7 @@ colors = require 'colors/safe'
 class DockerClient
     constructor: (@sshClient) ->
 
-    run: Promise.coroutine ({containerName, ports, environment, tag}) ->
+    run: Promise.coroutine ({containerName, ports, environment, tag, net}) ->
         unless containerName?
             throw new Error 'missing container name'
 
@@ -27,6 +27,9 @@ class DockerClient
 
         if envFile?
             command += " --env-file #{envFile}"
+
+        if net?
+            command += " --net=#{net}"
 
         command += " #{tag}"
 
