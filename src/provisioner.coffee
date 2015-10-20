@@ -72,7 +72,7 @@ module.exports = (host, proxy) ->
             yield @runContainer tag, containerName, runConfig
 
         ###
-            Login to private docker registry via `username` and `password`.
+            Login to private docker registry located at `registryHost` via `username` and `password`.
         ###
         loginToRegistry: Promise.coroutine (registryHost, username, password) ->
             yield @dockerClient.login registryHost, username, password
