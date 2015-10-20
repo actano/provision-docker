@@ -6,7 +6,7 @@ colors = require 'colors/safe'
 class DockerClient
     constructor: (@sshClient) ->
 
-    run: Promise.coroutine ({containerName, ports, environment, tag, net}) ->
+    run: Promise.coroutine ({containerName, ports, environment, tag, net, assets}) ->
         unless containerName?
             throw new Error 'missing container name'
 
@@ -30,6 +30,13 @@ class DockerClient
 
         if net?
             command += " --net=#{net}"
+
+        if assets?
+            yield @_uploadAssets assets
+
+            for asset in assets
+                remotePath = path.join '/home/vagrant/assets', path.basename asset.localPath
+                command += " -v #{remotePath}:#{asset.containerPath}"
 
         command += " #{tag}"
 
@@ -86,5 +93,14 @@ class DockerClient
             contents += "#{key}=#{value}\n"
 
         yield @sshClient.writeToFile contents, remotePath
+
+    _uploadAssets: Promise.coroutine (assets) ->
+        uploadPath = '/home/vagrant/assets'
+        yield @sshClient.exec "mkdir -p #{uploadPath}"
+
+        for asset in assets
+            remotePath = path.join uploadPath, path.basename asset.localPath
+            console.log colors.green "uploading asset '#{asset.localPath}' to remote path #{remotePath}"
+            yield @sshClient.uploadFile asset.localPath, remotePath
 
 module.exports = DockerClient

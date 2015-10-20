@@ -64,3 +64,5 @@ The following properties can be set:
 created on the remote host which is used by the `docker run` command
 * `net: <network mode>` - defines the network mode of the container, i.e. `--net=<network mode>` for the `docker run`
 command
+* `assets: [{localPath: ..., containerPath: ...}, ...]` - defines asset files which are uploaded to the remote host and
+mounted in the container under `containerPath`
