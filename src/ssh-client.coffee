@@ -45,29 +45,39 @@ class SSHClient
                 reject err
 
     writeToFile: (content, remotePath) ->
-        new Promise (resolve, reject) =>
-            @connection.sftp (err, sftp) =>
+        new Promise Promise.coroutine (resolve, reject) =>
+            sftp = yield @_getSftp()
+
+            writeStream = sftp.createWriteStream remotePath
+            writeStream.on 'finish', ->
+                resolve()
+            writeStream.write content, 'utf-8', (err) ->
+                return reject err if err?
+                writeStream.end()
+
+    fileExists: Promise.coroutine (remotePath) ->
+        sftp = yield @_getSftp()
+        try
+            stats = yield sftp.statAsync remotePath
+            return true
+        catch err
+            if err.code is SFTP_STATUS_CODE.NO_SUCH_FILE
+                return false
+            throw err
+
+    uploadFile: Promise.coroutine (localPath, remotePath) ->
+        sftp = yield @_getSftp()
+        yield sftp.fastPutAsync localPath, remotePath, {}
+
+    _getSftp: Promise.coroutine ->
+        @_sftp ?= yield new Promise (resolve, reject) =>
+            @connection.sftp (err, sftp) ->
                 return reject err if err?
 
-                writeStream = sftp.createWriteStream remotePath
-                writeStream.on 'finish', ->
-                    resolve()
-                writeStream.write content, 'utf-8', (err) ->
-                    return reject err if err?
-                    writeStream.end()
+                Promise.promisifyAll sftp
+                resolve sftp
 
-    fileExists: (remotePath) ->
-        new Promise (resolve, reject) =>
-            @connection.sftp (err, sftp) =>
-                return reject err if err?
-
-                sftp.stat remotePath, (err, stats) ->
-                    if err?
-                        if err.code is SFTP_STATUS_CODE.NO_SUCH_FILE
-                            return resolve false
-                        return reject err
-
-                    resolve true
+        return @_sftp
 
 class ProxiedSSHClient extends SSHClient
     constructor: (@proxyConfig, config) ->
