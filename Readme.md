@@ -18,40 +18,40 @@ via SSH.
 
 ### Provisioner
 
-#### Provisioner(host [, proxy]) -> Provisioner
+#### `Provisioner(host [, proxy]) -> Provisioner`
 
 Creates a new provisioner for the given `host`. An SSH `proxy` can be configured optionally if `host` is not
 directly accessible.
 
-#### .connect() -> Promise
+#### `.connect() -> Promise`
 
 Establishes a new connection to the host, ready to provision containers.
 
-#### .disconnect() -> Promise
+#### `.disconnect() -> Promise`
 
 Closes the connection to the host. Make sure to always call `disconnect` when finished with provisioning tasks.
 
-#### .runContainer(tag, containerName, runConfig) -> Promise
+#### `.runContainer(tag, containerName, runConfig) -> Promise`
 
 Starts a new container from image `tag` with name `containerName`. Run configurations like port mapping and environment
 variables can be set via `runConfig`.
 
-#### .replaceContainer(tag, containerName, runConfig) -> Promise
+#### `.replaceContainer(tag, containerName, runConfig) -> Promise`
 
 Replaces the container `containerName` with a new container from image `tag`. Run configurations like port mapping and
 environment variables can be set via `runConfig`.
 
-#### .ensureContainer(healthCheckPort, tag, containerName, runConfig) -> Promise
+#### `.ensureContainer(healthCheckPort, tag, containerName, runConfig) -> Promise`
 
 Ensures that a container is running by checking if `healthCheckPort` is open. Does nothing when port is open. Otherwise
 a new container `containerName` will be started from image `tag`. Run configurations like port mapping and environment
 variables can be set via `runConfig`.
 
-#### .loginToRegistry(registryHost, username, password) -> Promise
+#### `.loginToRegistry(registryHost, username, password) -> Promise`
 
 Login to private docker registry located at `registryHost` via `username` and `password`.
 
-#### .cleanup() -> Promise
+#### `.cleanup() -> Promise`
 
 Docker related cleanup:
 * remove dangling images
