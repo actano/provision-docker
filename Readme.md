@@ -11,8 +11,8 @@ There's no protection against malicious input which exploits the intended behavi
 
 ## General
 
-This library provides an API for provisioning of `docker` containers on remote hosts
-via SSH.
+This library provides an API for provisioning of `docker` containers on remote hosts via SSH. An SSH agent for
+authentication is mandatory by setting the environment variable `SSH_AUTH_SOCK`.
 
 ## API
 
