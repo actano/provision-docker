@@ -6,22 +6,24 @@ _ = require 'lodash'
 DockerClient = require './docker-client'
 healthCheck = require './health-check'
 
-module.exports = (host, proxy) ->
+module.exports = (host, username, options = {}) ->
+    {proxy} = options
+
     return {
         connect: Promise.coroutine ->
             if proxy?
                 @sshClient = new ProxiedSSHClient
                         host: proxy
-                        username: 'vagrant'
+                        username: username
                         agent: process.env.SSH_AUTH_SOCK
                     ,
                         host: host
-                        username: 'vagrant'
+                        username: username
                         agent: process.env.SSH_AUTH_SOCK
             else
                 @sshClient = new SSHClient
                     host: host
-                    username: 'vagrant'
+                    username: username
                     agent: process.env.SSH_AUTH_SOCK
 
             yield @sshClient.connect()

@@ -5,6 +5,7 @@ colors = require 'colors/safe'
 
 class DockerClient
     constructor: (@sshClient) ->
+        @username = @sshClient.username
 
     run: Promise.coroutine ({containerName, ports, environment, tag, net, assets}) ->
         unless containerName?
@@ -17,7 +18,7 @@ class DockerClient
         environment ?= {}
 
         if Object.keys(environment).length > 0
-            envFile = path.join "/home/vagrant/#{containerName}.env"
+            envFile = path.join "/home/#{@username}/#{containerName}.env"
             yield @_writeEnvFile environment, envFile
 
         command = "docker run -d --name #{containerName}"
@@ -35,7 +36,7 @@ class DockerClient
             yield @_uploadAssets assets
 
             for asset in assets
-                remotePath = path.join '/home/vagrant/assets', path.basename asset.localPath
+                remotePath = path.join "/home/#{@username}/assets", path.basename asset.localPath
                 command += " -v #{remotePath}:#{asset.containerPath}"
 
         command += " #{tag}"
@@ -66,15 +67,15 @@ class DockerClient
             yield @sshClient.exec "docker rmi `docker images -qf dangling=true`"
         catch err # allow fail, when no danling images present
 
-    login: Promise.coroutine (registryHost, username, password) ->
+    login: Promise.coroutine (registryHost, registryUsername, password) ->
         console.log colors.green "doing login for private registry"
 
-        exists = yield @sshClient.fileExists '/home/vagrant/.docker/config.json'
+        exists = yield @sshClient.fileExists "/home/#{@username}/.docker/config.json"
         if exists
             console.log colors.green 'already logged in'
             return
 
-        token = new Buffer("#{username}:#{password}").toString 'base64'
+        token = new Buffer("#{registryUsername}:#{password}").toString 'base64'
 
         auth =
             auths: {}
@@ -83,8 +84,8 @@ class DockerClient
             auth: token
             email: ''
 
-        yield @sshClient.exec 'mkdir -p /home/vagrant/.docker'
-        yield @sshClient.writeToFile JSON.stringify(auth), '/home/vagrant/.docker/config.json'
+        yield @sshClient.exec "mkdir -p /home/#{@username}/.docker"
+        yield @sshClient.writeToFile JSON.stringify(auth), "/home/#{@username}/.docker/config.json"
 
     _writeEnvFile: Promise.coroutine (env, remotePath) ->
         contents = ''
@@ -95,7 +96,7 @@ class DockerClient
         yield @sshClient.writeToFile contents, remotePath
 
     _uploadAssets: Promise.coroutine (assets) ->
-        uploadPath = '/home/vagrant/assets'
+        uploadPath = "/home/#{@username}/assets"
         yield @sshClient.exec "mkdir -p #{uploadPath}"
 
         for asset in assets

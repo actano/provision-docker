@@ -18,9 +18,11 @@ authentication is mandatory by setting the environment variable `SSH_AUTH_SOCK`.
 
 ### Provisioner
 
-#### `Provisioner(host [, proxy]) -> Provisioner`
+#### `Provisioner(host, username, options) -> Provisioner`
 
-Creates a new provisioner for the given `host`. An SSH `proxy` can be configured optionally if `host` is not
+Creates a new provisioner for the given `host` using `username` for SSH login.
+Options:
+* An SSH `proxy` can be configured optionally if `host` is not
 directly accessible.
 
 #### `.connect() -> Promise`
