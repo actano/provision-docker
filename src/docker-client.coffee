@@ -4,8 +4,7 @@ Promise = require 'bluebird'
 colors = require 'colors/safe'
 
 class DockerClient
-    constructor: (@sshClient) ->
-        @username = @sshClient.username
+    constructor: (@sshClient, @username) ->
 
     run: Promise.coroutine ({containerName, ports, environment, tag, net, assets}) ->
         unless containerName?

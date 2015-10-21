@@ -27,7 +27,7 @@ module.exports = (host, username, options = {}) ->
                     agent: process.env.SSH_AUTH_SOCK
 
             yield @sshClient.connect()
-            @dockerClient = new DockerClient @sshClient
+            @dockerClient = new DockerClient @sshClient, username
 
         disconnect: Promise.coroutine ->
             yield @sshClient.close()
