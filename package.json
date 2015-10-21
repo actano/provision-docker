@@ -15,6 +15,6 @@
     "ssh2": "^0.4.11"
   },
   "scripts": {
-    "prepublish": "coffee -c -o lib src/"
+    "postinstall": "coffee -c -o lib src/"
   }
 }
