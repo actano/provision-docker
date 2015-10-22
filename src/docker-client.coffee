@@ -16,29 +16,7 @@ class DockerClient
         ports ?= []
         environment ?= {}
 
-        if Object.keys(environment).length > 0
-            envFile = path.join "/home/#{@username}/#{containerName}.env"
-            yield @_writeEnvFile environment, envFile
-
-        command = "docker run -d --name #{containerName}"
-
-        for port in ports
-            command += " -p #{port}"
-
-        if envFile?
-            command += " --env-file #{envFile}"
-
-        if net?
-            command += " --net=#{net}"
-
-        if assets?
-            yield @_uploadAssets assets
-
-            for asset in assets
-                remotePath = path.join "/home/#{@username}/assets", path.basename asset.localPath
-                command += " -v #{remotePath}:#{asset.containerPath}"
-
-        command += " #{tag}"
+        command = yield @_buildRunCommand containerName, ports, environment, tag, net, assets
 
         console.log colors.green "starting container via '#{command}'"
 
@@ -102,5 +80,32 @@ class DockerClient
             remotePath = path.join uploadPath, path.basename asset.localPath
             console.log colors.green "uploading asset '#{asset.localPath}' to remote path #{remotePath}"
             yield @sshClient.uploadFile asset.localPath, remotePath
+
+    _buildRunCommand: Promise.coroutine (containerName, ports, environment, tag, net, assets) ->
+        if Object.keys(environment).length > 0
+            envFile = path.join "/home/#{@username}/#{containerName}.env"
+            yield @_writeEnvFile environment, envFile
+
+        command = "docker run -d --name #{containerName}"
+
+        for port in ports
+            command += " -p #{port}"
+
+        if envFile?
+            command += " --env-file #{envFile}"
+
+        if net?
+            command += " --net=#{net}"
+
+        if assets?
+            yield @_uploadAssets assets
+
+            for asset in assets
+                remotePath = path.join "/home/#{@username}/assets", path.basename asset.localPath
+                command += " -v #{remotePath}:#{asset.containerPath}"
+
+        command += " #{tag}"
+
+        return command
 
 module.exports = DockerClient
