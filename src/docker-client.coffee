@@ -68,6 +68,7 @@ class DockerClient
         contents = ''
 
         for key, value of env
+            continue unless value?
             contents += "#{key}=#{value}\n"
 
         yield @sshClient.writeToFile contents, remotePath
