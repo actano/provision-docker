@@ -39,13 +39,13 @@ class DockerClient
         yield @sshClient.exec "docker pull #{tag}"
 
     removeDanglingImages: Promise.coroutine ->
-        console.log colors.green "removing dangling images"
+        console.log colors.green 'removing dangling images'
         try
-            yield @sshClient.exec "docker rmi `docker images -qf dangling=true`"
+            yield @sshClient.exec 'docker rmi `docker images -qf dangling=true`'
         catch err # allow fail, when no danling images present
 
     login: Promise.coroutine (registryHost, registryUsername, password) ->
-        console.log colors.green "doing login for private registry"
+        console.log colors.green 'doing login for private registry'
 
         exists = yield @sshClient.fileExists "/home/#{@username}/.docker/config.json"
         if exists
