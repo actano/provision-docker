@@ -69,9 +69,9 @@ module.exports = (host, username, options = {}) ->
                 return
 
             console.log colors.yellow "#{containerName} seems to be down"
-            console.log colors.green "starting #{containerName}"
+            console.log colors.green "replacing #{containerName}"
 
-            yield @runContainer tag, containerName, runConfig
+            yield @replaceContainer tag, containerName, runConfig
 
         ###
             Login to private docker registry located at `registryHost` via `username` and `password`.
