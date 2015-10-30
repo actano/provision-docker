@@ -58,6 +58,10 @@ Login to private docker registry located at `registryHost` via `username` and `p
 Docker related cleanup:
 * remove dangling images
 
+#### `.healthCheck(host, port) -> Promise`
+
+Checks if `port` is open on `host`.
+
 #### `runConfig`
 
 The following properties can be set:

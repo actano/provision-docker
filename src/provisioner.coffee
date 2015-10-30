@@ -84,4 +84,10 @@ module.exports = (host, username, options = {}) ->
         ###
         cleanup: Promise.coroutine ->
             yield @dockerClient.removeDanglingImages()
+
+        ###
+            Checks if `port` is open on `host`.
+        ###
+        checkHealth: Promise.coroutine (host, port) ->
+            return yield healthCheck host, port
     }
