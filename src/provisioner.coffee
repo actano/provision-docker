@@ -12,13 +12,13 @@ module.exports = (host, username, options = {}) ->
         connect: Promise.coroutine ->
             if proxy?
                 @sshClient = new ProxiedSSHClient
-                        host: proxy
-                        username: username
-                        agent: process.env.SSH_AUTH_SOCK
-                    ,
-                        host: host
-                        username: username
-                        agent: process.env.SSH_AUTH_SOCK
+                    host: proxy
+                    username: username
+                    agent: process.env.SSH_AUTH_SOCK
+                ,
+                    host: host
+                    username: username
+                    agent: process.env.SSH_AUTH_SOCK
             else
                 @sshClient = new SSHClient
                     host: host
