@@ -4,7 +4,6 @@ _ = require 'lodash'
 
 {SSHClient, ProxiedSSHClient} = require './ssh-client'
 DockerClient = require './docker-client'
-healthCheck = require './health-check'
 
 module.exports = (host, username, options = {}) ->
     {proxy} = options
@@ -62,7 +61,7 @@ module.exports = (host, username, options = {}) ->
         ensureContainer: Promise.coroutine (healthCheckPort, tag, containerName, runConfig) ->
             console.log colors.green "checking health of #{containerName}"
 
-            isHealthy = yield healthCheck host, healthCheckPort
+            isHealthy = yield @checkHealth host, healthCheckPort
 
             if isHealthy
                 console.log colors.green "#{containerName} seems to be healthy"
@@ -89,5 +88,11 @@ module.exports = (host, username, options = {}) ->
             Checks if `port` is open on `host`.
         ###
         checkHealth: Promise.coroutine (host, port) ->
-            return yield healthCheck host, port
+            try
+                yield @sshClient.exec "nc -z #{host} #{port}"
+            catch err
+                return false if err.code is 1
+                throw err
+
+            return true
     }
