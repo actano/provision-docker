@@ -26,7 +26,7 @@ class SSHClient
     exec: (command) ->
         new Promise Promise.coroutine (resolve, reject) =>
             try
-                stream = yield @connection.execAsync command
+                stream = yield @connection.execAsync "sleep 0.2; #{command}"
                 stream.pipe process.stdout
                 stream.stderr.pipe process.stderr
                 stream
