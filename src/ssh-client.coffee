@@ -39,8 +39,6 @@ class SSHClient
                             reject error
                     .on 'error', (err) ->
                         reject err
-                    .on 'end', ->
-                        resolve()
             catch err
                 reject err
 
