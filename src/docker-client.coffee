@@ -20,29 +20,23 @@ class DockerClient
 
         console.log colors.green "starting container via '#{command}'"
 
-        yield @sshClient.exec command
+        yield @_execWithGuard command
 
     stop: Promise.coroutine (containerName) ->
         console.log colors.green "stopping container #{containerName}"
-        try
-            yield @sshClient.exec "docker stop #{containerName}"
-        catch err # allow fail, container may not exist
+        yield @sshClient.exec "docker stop #{containerName}" # allow fail, container may not exist
 
     rm: Promise.coroutine (containerName) ->
         console.log colors.green "removing container #{containerName}"
-        try
-            yield @sshClient.exec "docker rm -v #{containerName}"
-        catch err # allow fail, container may not exist
+        yield @sshClient.exec "docker rm -v #{containerName}" # allow fail, container may not exist
 
     pull: Promise.coroutine (tag) ->
         console.log colors.green "pulling image #{tag}"
-        yield @sshClient.exec "docker pull #{tag}"
+        yield @_execWithGuard "docker pull #{tag}"
 
     removeDanglingImages: Promise.coroutine ->
         console.log colors.green 'removing dangling images'
-        try
-            yield @sshClient.exec 'docker rmi `docker images -qf dangling=true`'
-        catch err # allow fail, when no danling images present
+        yield @sshClient.exec 'docker rmi `docker images -qf dangling=true`' # allow fail, when no danling images present
 
     login: Promise.coroutine (registryHost, registryUsername, password) ->
         console.log colors.green 'doing login for private registry'
@@ -61,7 +55,7 @@ class DockerClient
             auth: token
             email: ''
 
-        yield @sshClient.exec "mkdir -p /home/#{@username}/.docker"
+        yield @_execWithGuard "mkdir -p /home/#{@username}/.docker"
         yield @sshClient.writeToFile JSON.stringify(auth), "/home/#{@username}/.docker/config.json"
 
     _writeEnvFile: Promise.coroutine (env, remotePath) ->
@@ -75,7 +69,7 @@ class DockerClient
 
     _uploadAssets: Promise.coroutine (assets) ->
         uploadPath = "/home/#{@username}/assets"
-        yield @sshClient.exec "mkdir -p #{uploadPath}"
+        yield @_execWithGuard "mkdir -p #{uploadPath}"
 
         for asset in assets
             remotePath = path.join uploadPath, path.basename asset.localPath
@@ -108,5 +102,11 @@ class DockerClient
         command += " #{tag}"
 
         return command
+
+    _execWithGuard: Promise.coroutine (command) ->
+        exitCode = yield @sshClient.exec command
+
+        unless exitCode is 0
+            throw new Error "command '#{command}' failed with exit code #{exitCode}"
 
 module.exports = DockerClient

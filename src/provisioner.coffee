@@ -88,11 +88,8 @@ module.exports = (host, username, options = {}) ->
             Checks if `port` is open on `host`.
         ###
         checkHealth: Promise.coroutine (host, port) ->
-            try
-                yield @sshClient.exec "nc -z #{host} #{port}"
-            catch err
-                return false if err.code is 1
-                throw err
+            exitCode = yield @sshClient.exec "nc -z #{host} #{port}"
 
-            return true
+            return true if exitCode is 0
+            return false
     }
