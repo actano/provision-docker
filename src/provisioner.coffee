@@ -40,8 +40,11 @@ module.exports = (host, username, options = {}) ->
         runContainer: Promise.coroutine (tag, containerName, runConfig) ->
             _runConfig = _.extend {}, runConfig, {containerName, tag}
             if runConfig.assets?
-                assets = runConfig.assets.map (assetInfo) -> assetInfo.localPath
-                yield @uploadAssets assets
+                files = runConfig.assets.map (assetInfo) -> assetInfo.localPath
+                targetDirectory = "/home/#{username}/assets"
+
+                yield @uploadFiles files, targetDirectory
+
             yield @dockerClient.run _runConfig
 
         ###
@@ -98,19 +101,17 @@ module.exports = (host, username, options = {}) ->
             return false
 
         ###
-            Uploads asset files given by `assets` to the remote directory `/home/<username>/assets`, where `assets`
-            is an array of local paths.
+            Uploads `files` to the remote directory `targetDirectory`.
         ###
-        uploadAssets: Promise.coroutine (assets) ->
-            uploadPath = "/home/#{username}/assets"
-            exitCode = yield @sshClient.exec "mkdir -p #{uploadPath}"
+        uploadFiles: Promise.coroutine (files, targetDirectory) ->
+            exitCode = yield @sshClient.exec "mkdir -p #{targetDirectory}"
             unless exitCode is 0
-                throw new Error "error while creating directory #{uploadPath}"
+                throw new Error "error while creating directory #{targetDirectory}"
 
-            for asset in assets
-                remotePath = path.join uploadPath, path.basename asset
-                console.log colors.green "uploading asset '#{asset}' to remote path #{remotePath}"
-                yield @sshClient.uploadFile asset, remotePath
+            for file in files
+                remotePath = path.join targetDirectory, path.basename file
+                console.log colors.green "uploading file '#{file}' to remote path #{remotePath}"
+                yield @sshClient.uploadFile file, remotePath
 
         sendSignalToContainer: Promise.coroutine (containerName, signal) ->
             yield @dockerClient.sendSignalToContainer containerName, signal

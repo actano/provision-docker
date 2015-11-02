@@ -62,6 +62,10 @@ Docker related cleanup:
 
 Checks if `port` is open on `host`.
 
+#### `.uploadFiles(files, targetDirectory) -> Promise`
+
+Uploads `files` to the remote directory `targetDirectory`.
+
 #### `runConfig`
 
 The following properties can be set:
