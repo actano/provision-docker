@@ -31,12 +31,7 @@ class SSHClient
                 stream.stderr.pipe process.stderr
                 stream
                     .on 'close', (code) ->
-                        if code is 0
-                            resolve()
-                        else
-                            error = new Error "command '#{command}' failed with exit code #{code}"
-                            error.code = code
-                            reject error
+                        resolve code
                     .on 'error', (err) ->
                         reject err
             catch err
