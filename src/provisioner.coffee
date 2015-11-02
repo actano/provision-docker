@@ -113,6 +113,9 @@ module.exports = (host, username, options = {}) ->
                 console.log colors.green "uploading file '#{file}' to remote path #{remotePath}"
                 yield @sshClient.uploadFile file, remotePath
 
+        ###
+            Sends `signal` to container with name `containerName`.
+        ###
         sendSignalToContainer: Promise.coroutine (containerName, signal) ->
             yield @dockerClient.sendSignalToContainer containerName, signal
     }

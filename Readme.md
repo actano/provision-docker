@@ -66,6 +66,10 @@ Checks if `port` is open on `host`.
 
 Uploads `files` to the remote directory `targetDirectory`.
 
+#### `.sendSignalToContainer(containerName, signal) -> Promise`
+
+Sends `signal` to container with name `containerName`.
+
 #### `runConfig`
 
 The following properties can be set:
