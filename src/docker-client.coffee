@@ -67,15 +67,6 @@ class DockerClient
 
         yield @sshClient.writeToFile contents, remotePath
 
-    _uploadAssets: Promise.coroutine (assets) ->
-        uploadPath = "/home/#{@username}/assets"
-        yield @_execWithGuard "mkdir -p #{uploadPath}"
-
-        for asset in assets
-            remotePath = path.join uploadPath, path.basename asset.localPath
-            console.log colors.green "uploading asset '#{asset.localPath}' to remote path #{remotePath}"
-            yield @sshClient.uploadFile asset.localPath, remotePath
-
     _buildRunCommand: Promise.coroutine (containerName, ports, environment, tag, net, assets) ->
         if Object.keys(environment).length > 0
             envFile = path.join "/home/#{@username}/#{containerName}.env"
@@ -93,8 +84,6 @@ class DockerClient
             command += " --net=#{net}"
 
         if assets?
-            yield @_uploadAssets assets
-
             for asset in assets
                 remotePath = path.join "/home/#{@username}/assets", path.basename asset.localPath
                 command += " -v #{remotePath}:#{asset.containerPath}"

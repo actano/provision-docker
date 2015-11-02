@@ -1,6 +1,7 @@
 Promise = require 'bluebird'
 colors = require 'colors/safe'
 _ = require 'lodash'
+path = require 'path'
 
 {SSHClient, ProxiedSSHClient} = require './ssh-client'
 DockerClient = require './docker-client'
@@ -38,6 +39,8 @@ module.exports = (host, username, options = {}) ->
         ###
         runContainer: Promise.coroutine (tag, containerName, runConfig) ->
             _runConfig = _.extend {}, runConfig, {containerName, tag}
+            if runConfig.assets?
+                yield @uploadAssets runConfig.assets
             yield @dockerClient.run _runConfig
 
         ###
@@ -92,4 +95,15 @@ module.exports = (host, username, options = {}) ->
 
             return true if exitCode is 0
             return false
+
+        uploadAssets: Promise.coroutine (assets) ->
+            uploadPath = "/home/#{@username}/assets"
+            exitCode = yield @sshClient.exec "mkdir -p #{uploadPath}"
+            unless exitCode is 0
+                throw new Error "error while creating directory #{uploadPath}"
+
+            for asset in assets
+                remotePath = path.join uploadPath, path.basename asset.localPath
+                console.log colors.green "uploading asset '#{asset.localPath}' to remote path #{remotePath}"
+                yield @sshClient.uploadFile asset.localPath, remotePath
     }
