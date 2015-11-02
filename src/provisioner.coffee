@@ -40,7 +40,8 @@ module.exports = (host, username, options = {}) ->
         runContainer: Promise.coroutine (tag, containerName, runConfig) ->
             _runConfig = _.extend {}, runConfig, {containerName, tag}
             if runConfig.assets?
-                yield @uploadAssets runConfig.assets
+                assets = runConfig.assets.map (assetInfo) -> assetInfo.localPath
+                yield @uploadAssets assets
             yield @dockerClient.run _runConfig
 
         ###
@@ -96,6 +97,10 @@ module.exports = (host, username, options = {}) ->
             return true if exitCode is 0
             return false
 
+        ###
+            Uploads asset files given by `assets` to the remote directory `/home/<username>/assets`, where `assets`
+            is an array of local paths.
+        ###
         uploadAssets: Promise.coroutine (assets) ->
             uploadPath = "/home/#{username}/assets"
             exitCode = yield @sshClient.exec "mkdir -p #{uploadPath}"
@@ -103,9 +108,9 @@ module.exports = (host, username, options = {}) ->
                 throw new Error "error while creating directory #{uploadPath}"
 
             for asset in assets
-                remotePath = path.join uploadPath, path.basename asset.localPath
-                console.log colors.green "uploading asset '#{asset.localPath}' to remote path #{remotePath}"
-                yield @sshClient.uploadFile asset.localPath, remotePath
+                remotePath = path.join uploadPath, path.basename asset
+                console.log colors.green "uploading asset '#{asset}' to remote path #{remotePath}"
+                yield @sshClient.uploadFile asset, remotePath
 
         sendSignalToContainer: Promise.coroutine (containerName, signal) ->
             yield @dockerClient.sendSignalToContainer containerName, signal
