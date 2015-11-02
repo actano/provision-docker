@@ -97,7 +97,7 @@ module.exports = (host, username, options = {}) ->
             return false
 
         uploadAssets: Promise.coroutine (assets) ->
-            uploadPath = "/home/#{@username}/assets"
+            uploadPath = "/home/#{username}/assets"
             exitCode = yield @sshClient.exec "mkdir -p #{uploadPath}"
             unless exitCode is 0
                 throw new Error "error while creating directory #{uploadPath}"
