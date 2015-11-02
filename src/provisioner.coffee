@@ -106,4 +106,7 @@ module.exports = (host, username, options = {}) ->
                 remotePath = path.join uploadPath, path.basename asset.localPath
                 console.log colors.green "uploading asset '#{asset.localPath}' to remote path #{remotePath}"
                 yield @sshClient.uploadFile asset.localPath, remotePath
+
+        sendSignalToContainer: Promise.coroutine (containerName, signal) ->
+            yield @dockerClient.sendSignalToContainer containerName, signal
     }

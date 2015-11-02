@@ -58,6 +58,10 @@ class DockerClient
         yield @_execWithGuard "mkdir -p /home/#{@username}/.docker"
         yield @sshClient.writeToFile JSON.stringify(auth), "/home/#{@username}/.docker/config.json"
 
+    sendSignalToContainer: Promise.coroutine (containerName, signal) ->
+        console.log colors.green "sending signal #{signal} to #{containerName}"
+        yield @_execWithGuard "docker kill -s #{signal} #{containerName}"
+
     _writeEnvFile: Promise.coroutine (env, remotePath) ->
         contents = ''
 
