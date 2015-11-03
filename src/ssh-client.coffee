@@ -39,10 +39,15 @@ class SSHClient
             catch err
                 reject err
 
-    execScript: (pathToScript) ->
+    execScript: (pathToScript, args = [], opts = {}) ->
         new Promise Promise.coroutine (resolve, reject) =>
             try
-                stream = yield @connection.execAsync 'bash -s'
+                command = "bash -s #{args.join ' '}"
+
+                if opts.sudo is true
+                    command = 'sudo ' + command
+
+                stream = yield @connection.execAsync command
                 stream
                     .on 'close', (code) ->
                         resolve code
