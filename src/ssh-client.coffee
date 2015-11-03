@@ -1,3 +1,5 @@
+fs = require 'fs'
+path = require 'path'
 Promise = require 'bluebird'
 {Client, SFTP_STATUS_CODE} = require 'ssh2'
 
@@ -34,6 +36,24 @@ class SSHClient
                         resolve code
                     .on 'error', (err) ->
                         reject err
+            catch err
+                reject err
+
+    execScript: (pathToScript) ->
+        new Promise Promise.coroutine (resolve, reject) =>
+            try
+                stream = yield @connection.execAsync 'bash -s'
+                stream
+                    .on 'close', (code) ->
+                        resolve code
+                    .on 'error', (err) ->
+                        reject err
+
+                stream.pipe process.stdout
+                stream.stderr.pipe process.stderr
+
+                scriptReadStream = fs.createReadStream path.resolve pathToScript
+                scriptReadStream.pipe stream
             catch err
                 reject err
 
