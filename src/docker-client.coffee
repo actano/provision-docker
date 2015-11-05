@@ -15,8 +15,8 @@ class DockerClient
         unless tag?
             throw new Error 'missing tag'
 
-        ports ?= []
-        environment ?= {}
+        config.ports ?= []
+        config.environment ?= {}
 
         command = yield @_buildRunCommand config
 
