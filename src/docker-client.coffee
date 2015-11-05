@@ -6,7 +6,9 @@ colors = require 'colors/safe'
 class DockerClient
     constructor: (@sshClient, @username) ->
 
-    run: Promise.coroutine ({containerName, ports, environment, tag, net, assets}) ->
+    run: Promise.coroutine (config) ->
+        {containerName, tag} = config
+
         unless containerName?
             throw new Error 'missing container name'
 
@@ -16,7 +18,7 @@ class DockerClient
         ports ?= []
         environment ?= {}
 
-        command = yield @_buildRunCommand containerName, ports, environment, tag, net, assets
+        command = yield @_buildRunCommand config
 
         console.log colors.green "starting container via '#{command}'"
 
@@ -71,7 +73,9 @@ class DockerClient
 
         yield @sshClient.writeToFile contents, remotePath
 
-    _buildRunCommand: Promise.coroutine (containerName, ports, environment, tag, net, assets) ->
+    _buildRunCommand: Promise.coroutine (config) ->
+        {containerName, ports, environment, tag, net, assets, restart} = config
+
         if Object.keys(environment).length > 0
             envFile = path.join "/home/#{@username}/#{containerName}.env"
             yield @_writeEnvFile environment, envFile
@@ -86,6 +90,9 @@ class DockerClient
 
         if net?
             command += " --net=#{net}"
+
+        if restart?
+            command += " --restart=#{restart}"
 
         if assets?
             for asset in assets
