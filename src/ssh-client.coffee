@@ -4,6 +4,7 @@ Promise = require 'bluebird'
 {Client, SFTP_STATUS_CODE} = require 'ssh2'
 
 Promise.promisifyAll Client.prototype
+Promise.promisifyAll fs
 
 class SSHClient
     constructor: (@config) ->
@@ -85,7 +86,11 @@ class SSHClient
 
     uploadFile: Promise.coroutine (localPath, remotePath) ->
         sftp = yield @_getSftp()
+        stats = yield fs.statAsync localPath
+        mode = stats['mode']
+
         yield sftp.fastPutAsync localPath, remotePath, {}
+        yield sftp.chmodAsync remotePath, mode
 
     downloadFile: Promise.coroutine (remotePath, localPath) ->
         sftp = yield @_getSftp()
