@@ -87,6 +87,10 @@ class SSHClient
         sftp = yield @_getSftp()
         yield sftp.fastPutAsync localPath, remotePath, {}
 
+    downloadFile: Promise.coroutine (remotePath, localPath) ->
+        sftp = yield @_getSftp()
+        yield sftp.fastGetAsync remotePath, localPath, {}
+
     _getSftp: Promise.coroutine ->
         @_sftp ?= yield new Promise (resolve, reject) =>
             @connection.sftp (err, sftp) ->
