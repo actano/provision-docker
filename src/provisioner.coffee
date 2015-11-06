@@ -47,6 +47,13 @@ module.exports = (host, username, options = {}) ->
 
             yield @dockerClient.run _runConfig
 
+
+        ###
+            Execute a command` via ssh
+        ###
+        exec: Promise.coroutine (command) ->
+            yield @sshClient.exec command
+
         ###
             Replaces the container `containerName` with a new container from image `tag`.
             Run configurations like port mapping and environment variables can be set
