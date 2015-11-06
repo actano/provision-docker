@@ -121,6 +121,16 @@ module.exports = (host, username, options = {}) ->
                 yield @sshClient.uploadFile file, remotePath
 
         ###
+            Download `file` from remote and save as `targetFile`.
+        ###
+        downloadFile: Promise.coroutine (file, targetFile) ->
+            unless yield @sshClient.fileExists file
+                throw new Error "error while downloading file '#{file}': File does not exist"
+
+            console.log colors.green "downloading file '#{file}' to local path #{targetFile}"
+            yield @sshClient.downloadFile file, targetFile
+
+        ###
             Sends `signal` to container with name `containerName`.
         ###
         sendSignalToContainer: Promise.coroutine (containerName, signal) ->
