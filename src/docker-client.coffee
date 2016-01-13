@@ -74,7 +74,7 @@ class DockerClient
         yield @sshClient.writeToFile contents, remotePath
 
     _buildRunCommand: Promise.coroutine (config) ->
-        {containerName, ports, environment, tag, net, assets, restart} = config
+        {containerName, ports, environment, tag, net, assets, restart, cmd} = config
 
         if Object.keys(environment).length > 0
             envFile = path.join "/home/#{@username}/#{containerName}.env"
@@ -100,6 +100,9 @@ class DockerClient
                 command += " -v #{remotePath}:#{asset.containerPath}"
 
         command += " #{tag}"
+
+        if cmd?
+            command += " #{cmd}"
 
         return command
 
