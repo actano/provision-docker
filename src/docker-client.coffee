@@ -74,7 +74,7 @@ class DockerClient
         yield @sshClient.writeToFile contents, remotePath
 
     _buildRunCommand: Promise.coroutine (config) ->
-        {containerName, ports, environment, tag, net, assets, restart, cmd, volumes, addHosts} = config
+        {containerName, ports, environment, tag, net, assets, restart, cmd, volumes, addHosts, limits} = config
 
         if Object.keys(environment).length > 0
             envFile = path.join "/home/#{@username}/#{containerName}.env"
@@ -106,6 +106,9 @@ class DockerClient
         if addHosts?
             for addHost in addHosts
                 command += " --add-host #{addHost}"
+
+        if limits?.memory?
+            command += " --memory #{limits.memory}"
 
         command += " #{tag}"
 
