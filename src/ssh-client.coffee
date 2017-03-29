@@ -88,6 +88,7 @@ class SSHClient
         sftp = yield @_getSftp()
         stats = yield fs.statAsync localPath
         mode = stats['mode']
+        mode = mode | 0o200 # ensure that file is always writable by the owner, i.e. deploy tool
 
         yield sftp.fastPutAsync localPath, remotePath, {}
         yield sftp.chmodAsync remotePath, mode
