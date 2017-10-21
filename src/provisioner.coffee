@@ -55,14 +55,26 @@ module.exports = (host, username, options = {}) ->
             yield @sshClient.exec command
 
         ###
+            Pulls the image with the given `tag`.
+        ###
+        pullImage: Promise.coroutine (tag) ->
+            yield @dockerClient.pull tag
+
+        ###
+            Removes the container with the given `containerName`.
+        ###
+        removeContainer: Promise.coroutine (containerName) ->
+            yield @dockerClient.stop containerName
+            yield @dockerClient.rm containerName
+
+        ###
             Replaces the container `containerName` with a new container from image `tag`.
             Run configurations like port mapping and environment variables can be set
             via `runConfig`.
         ###
         replaceContainer: Promise.coroutine (tag, containerName, runConfig) ->
-            yield @dockerClient.pull tag
-            yield @dockerClient.stop containerName
-            yield @dockerClient.rm containerName
+            yield @pullImage tag
+            yield @removeContainer containerName
             yield @runContainer tag, containerName, runConfig
 
         ###
