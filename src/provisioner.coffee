@@ -7,14 +7,16 @@ path = require 'path'
 DockerClient = require './docker-client'
 
 module.exports = (host, username, options = {}) ->
-    {proxy} = options
+    {proxy, proxyUsername} = options
 
     return {
         connect: Promise.coroutine ->
             if proxy?
+                proxyUsername ?= username
+
                 @sshClient = new ProxiedSSHClient
                     host: proxy
-                    username: username
+                    username: proxyUsername
                     agent: process.env.SSH_AUTH_SOCK
                 ,
                     host: host
