@@ -57,25 +57,33 @@ class DockerClient {
 
   async login(registryHost, registryUsername, password) {
     console.log(colors.green('doing login for private registry'))
+    const configPath = `/home/${this.username}/.docker/config.json`
 
-    const exists = await this.sshClient.fileExists(`/home/${this.username}/.docker/config.json`)
+    let configContent = { auths: {} }
+    const exists = await this.sshClient.fileExists(configPath)
+
     if (exists) {
-      console.log(colors.green('already logged in'))
-      return
+      console.log(colors.green('registry config file already exists'))
+
+      try {
+        configContent = JSON.parse(await this.sshClient.readFromFile(configPath))
+      } catch (err) {
+        if (!(err instanceof SyntaxError)) {
+          throw err
+        }
+        console.log(colors.yellow('unable to read registry config file. creating a new one'))
+      }
     }
 
     const token = Buffer.from(`${registryUsername}:${password}`).toString('base64')
 
-    const auth =
-      { auths: {} }
-
-    auth.auths[registryHost] = {
+    configContent.auths[registryHost] = {
       auth: token,
       email: '',
     }
 
     await this._execWithGuard(`mkdir -p /home/${this.username}/.docker`)
-    await this.sshClient.writeToFile(JSON.stringify(auth), `/home/${this.username}/.docker/config.json`)
+    await this.sshClient.writeToFile(JSON.stringify(configContent), `/home/${this.username}/.docker/config.json`)
   }
 
   async sendSignalToContainer(containerName, signal) {

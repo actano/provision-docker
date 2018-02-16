@@ -87,6 +87,23 @@ class SSHClient {
     })
   }
 
+  readFromFile(remotePath) {
+    return new Promise(async (resolve, reject) => {
+      const sftp = await this._getSftp()
+
+      let content = ''
+      const readStream = sftp.createReadStream(remotePath)
+      readStream
+        .on('data', (chunk) => {
+          content += chunk.toString()
+        })
+        .on('end', () => {
+          resolve(content)
+        })
+        .on('error', reject)
+    })
+  }
+
   async fileExists(remotePath) {
     const sftp = await this._getSftp()
     try {
