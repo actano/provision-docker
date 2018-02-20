@@ -113,6 +113,7 @@ class DockerClient {
       cmd,
       containerName,
       environment,
+      hostname,
       limits,
       net,
       ports,
@@ -161,6 +162,10 @@ class DockerClient {
       for (const addHost of addHosts) {
         command += ` --add-host ${addHost}`
       }
+    }
+
+    if (hostname != null) {
+      command += ` --hostname ${hostname}`
     }
 
     if ((limits != null ? limits.memory : undefined) != null) {
