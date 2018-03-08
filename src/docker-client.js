@@ -112,6 +112,7 @@ class DockerClient {
       assets,
       cmd,
       containerName,
+      entrypoint,
       environment,
       hostname,
       limits,
@@ -176,6 +177,10 @@ class DockerClient {
       for (const addCapability of addCapabilities) {
         command += ` --cap-add ${addCapability}`
       }
+    }
+
+    if (entrypoint != null) {
+      command += ` --entrypoint ${entrypoint}`
     }
 
     command += ` ${tag}`
